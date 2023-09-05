@@ -9,7 +9,7 @@ As a fully decentralized dataspace is hard to imagine, the MVD also serves the p
 
 ## Documentation
 
-Developer documentation can be found under [docs/developer](docs/developer), where the main concepts and decisions are captured as [decision records](docs/developer/decision-records/).
+Developer documentation can be found under [docs/developer](docs/developer), where the main concepts and decisions are captured as [decision records](docs/developer/decision-records).
 
 ## Local Development Setup
 
@@ -97,7 +97,7 @@ All this can also be done using Azure CLI with the following lines from the root
 ```bash
 conn_str="DefaultEndpointsProtocol=http;AccountName=company1assets;AccountKey=key1;BlobEndpoint=http://127.0.0.1:10000/company1assets;"
 az storage container create --name src-container --connection-string $conn_str
-az storage blob upload -f ./deployment/terraform/participant/sample-data/text-document.txt --container-name src-container --name text-document.txt --connection-string $conn_str
+az storage blob upload -f ./deployment/azure/terraform/modules/participant/sample-data/text-document.txt --container-name src-container --name text-document.txt --connection-string $conn_str
 ```
 
 This should result in a similar output as follows. Via the Microsoft Azure Storage Explorer it would be possible to
@@ -110,8 +110,9 @@ review the new container and the uploaded blob.
 
 Finished[#############################################################]  100.0000%
 {
-  "etag": "\"0x1CC7CAB96842160\"",
-  "lastModified": "2022-08-08T15:14:01+00:00"
+  "date": "2023-09-05T08:44:33+00:00",
+  "etag": "\"0x24BD3E649F13380\"",
+  "lastModified": "2023-09-05T08:44:33+00:00",
 }
 ```
 
