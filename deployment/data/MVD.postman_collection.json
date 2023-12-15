@@ -170,6 +170,46 @@
 					"response": []
 				},
 				{
+					"name": "Publish Policy 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content (if new policy) or 409 Conflict (if policy already exists)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 409])",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@context\": {\n      \"edc\": \"https://w3id.org/edc/v0.0.1/ns/\"  \n    },\n    \"@id\": \"company1-trusted-policy\",\n    \"edc:policy\": {\n        \"@context\": \"http://www.w3.org/ns/odrl.jsonld\",\n        \"permission\": [\n            {\n                \"action\": \"use\",\n                \"constraint\": {\n                    \"@type\": \"LogicalConstraint\",\n                    \"leftOperand\": \"https://w3id.org/edc/v0.0.1/ns/trustedParticipants\",\n                    \"operator\": \"in\",\n                    \"rightOperand\": [\"company1\"]\n                }\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{data_management_url}}/v2/policydefinitions",
+							"host": [
+								"{{data_management_url}}"
+							],
+							"path": [
+								"v2",
+								"policydefinitions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Publish ContractDefinition 1",
 					"event": [
 						{
@@ -230,6 +270,46 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"@context\": {\n      \"edc\": \"https://w3id.org/edc/v0.0.1/ns/\"\n    },\n    \"@id\": \"test-document-2_{{participant_id}}\",\n    \"accessPolicyId\": \"eu-restricted-policy\",\n    \"contractPolicyId\": \"eu-restricted-policy\",\n    \"assetsSelector\": [\n      {\n        \"operandLeft\": \"https://w3id.org/edc/v0.0.1/ns/id\",\n        \"operator\": \"=\",\n        \"operandRight\": \"test-document-2_{{participant_id}}\"\n      }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{data_management_url}}/v2/contractdefinitions",
+							"host": [
+								"{{data_management_url}}"
+							],
+							"path": [
+								"v2",
+								"contractdefinitions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Publish ContractDefinition 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content (if new contract definition) or 409 Conflict (if contract definition already exists)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204, 409])",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@context\": {\n      \"edc\": \"https://w3id.org/edc/v0.0.1/ns/\"\n    },\n    \"@id\": \"test-document-3_{{participant_id}}\",\n    \"accessPolicyId\": \"company1-trusted-policy\",\n    \"contractPolicyId\": \"company1-trusted-policy\",\n    \"assetsSelector\": [\n      {\n        \"operandLeft\": \"https://w3id.org/edc/v0.0.1/ns/id\",\n        \"operator\": \"=\",\n        \"operandRight\": \"test-document-2_{{participant_id}}\"\n      }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"

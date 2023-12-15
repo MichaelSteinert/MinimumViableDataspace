@@ -4,18 +4,21 @@
       "participant": "company1",
       "region": "eu",
       "country": "FR",
+      "trusted_participants": ["company2"],
       "data_dashboard_theme": "theme-1"
     },
     {
       "participant": "company2",
       "region": "eu",
       "country": "DE",
+      "trusted_participants": ["company1", "company3"],
       "data_dashboard_theme": "theme-2"
     },
     {
       "participant": "company3",
       "region": "us",
       "country": "US",
+      "trusted_participants": ["company2"],
       "data_dashboard_theme": "theme-3"
     }
   ]

@@ -35,6 +35,9 @@ public class SeedPoliciesExtension implements ServiceExtension {
     private static final String REGION_LOCATION = "regionLocation";
     private static final String REGION_LOCATION_EVALUATION_KEY = EDC_NAMESPACE + REGION_LOCATION;
 
+    private static final String TRUSTED_PARTICIPANTS = "trustedParticipants";
+    private static final String TRUSTED_PARTICIPANTS_EVALUATION_KEY = EDC_NAMESPACE + TRUSTED_PARTICIPANTS;
+
     @Inject
     private RuleBindingRegistry ruleBindingRegistry;
 
@@ -61,8 +64,21 @@ public class SeedPoliciesExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         ruleBindingRegistry.bind("USE", CATALOGING_SCOPE);
         ruleBindingRegistry.bind(ODRL_SCHEMA + "use", CATALOGING_SCOPE);
-        ruleBindingRegistry.bind(REGION_LOCATION_EVALUATION_KEY, CATALOGING_SCOPE);
-        policyEngine.registerFunction(CATALOGING_SCOPE, Permission.class, REGION_LOCATION_EVALUATION_KEY, new RegionConstraintFunction());
-    }
 
+        ruleBindingRegistry.bind(REGION_LOCATION_EVALUATION_KEY, CATALOGING_SCOPE);
+        ruleBindingRegistry.bind(TRUSTED_PARTICIPANTS_EVALUATION_KEY, CATALOGING_SCOPE);
+
+        policyEngine.registerFunction(
+                CATALOGING_SCOPE,
+                Permission.class,
+                REGION_LOCATION_EVALUATION_KEY,
+                new RegionConstraintFunction()
+        );
+        policyEngine.registerFunction(
+                CATALOGING_SCOPE,
+                Permission.class,
+                TRUSTED_PARTICIPANTS_EVALUATION_KEY,
+                new TrustedParticipantsConstraintFunction()
+        );
+    }
 }
