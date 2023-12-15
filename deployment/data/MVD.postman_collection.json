@@ -189,7 +189,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"@context\": {\n      \"edc\": \"https://w3id.org/edc/v0.0.1/ns/\"  \n    },\n    \"@id\": \"company1-trusted-policy\",\n    \"edc:policy\": {\n        \"@context\": \"http://www.w3.org/ns/odrl.jsonld\",\n        \"permission\": [\n            {\n                \"action\": \"use\",\n                \"constraint\": {\n                    \"@type\": \"LogicalConstraint\",\n                    \"leftOperand\": \"https://w3id.org/edc/v0.0.1/ns/trustedParticipants\",\n                    \"operator\": \"in\",\n                    \"rightOperand\": [\"company1\"]\n                }\n            }\n        ]\n    }\n}",
+							"raw": "{\n    \"@context\": {\n      \"edc\": \"https://w3id.org/edc/v0.0.1/ns/\"  \n    },\n    \"@id\": \"company1-trusted-policy\",\n    \"edc:policy\": {\n        \"@context\": \"http://www.w3.org/ns/odrl.jsonld\",\n        \"permission\": [\n            {\n                \"action\": \"use\",\n                \"constraint\": {\n                    \"@type\": \"LogicalConstraint\",\n                    \"leftOperand\": \"https://w3id.org/edc/v0.0.1/ns/trustedParticipants\",\n                    \"operator\": \"isPartOf\",\n                    \"rightOperand\": [\"company1\"]\n                }\n            }\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
