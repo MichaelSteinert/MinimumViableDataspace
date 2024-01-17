@@ -64,10 +64,8 @@ public class SeedPoliciesExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         ruleBindingRegistry.bind("USE", CATALOGING_SCOPE);
         ruleBindingRegistry.bind(ODRL_SCHEMA + "use", CATALOGING_SCOPE);
-
         ruleBindingRegistry.bind(REGION_LOCATION_EVALUATION_KEY, CATALOGING_SCOPE);
         ruleBindingRegistry.bind(TRUSTED_PARTICIPANTS_EVALUATION_KEY, CATALOGING_SCOPE);
-
         policyEngine.registerFunction(
                 CATALOGING_SCOPE,
                 Permission.class,

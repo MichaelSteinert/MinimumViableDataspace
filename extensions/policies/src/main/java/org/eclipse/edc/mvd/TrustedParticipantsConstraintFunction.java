@@ -19,17 +19,28 @@ import org.eclipse.edc.policy.engine.spi.AtomicConstraintFunction;
 import org.eclipse.edc.policy.engine.spi.PolicyContext;
 import org.eclipse.edc.policy.model.Operator;
 import org.eclipse.edc.policy.model.Permission;
-import org.jetbrains.annotations.Nullable;
+import org.eclipse.edc.spi.agent.ParticipantAgent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * TrustedParticipantsConstraintFunction is used to assess whether
+ * the participants involved in a transfer are trusted, based on a
+ * predefined set of trusted participants.
+ * <p>
+ * This class implements the AtomicConstraintFunction interface
+ * and provides the logic to validate the trustworthiness of
+ * participants against the set policies.
+ */
 public class TrustedParticipantsConstraintFunction implements AtomicConstraintFunction<Permission> {
 
     private static final Logger LOGGER = Logger.getLogger(TrustedParticipantsConstraintFunction.class.getName());
@@ -38,18 +49,22 @@ public class TrustedParticipantsConstraintFunction implements AtomicConstraintFu
 
     @Override
     public boolean evaluate(Operator operator, Object rightValue, Permission rule, PolicyContext context) {
-        var claims = context.getParticipantAgent().getClaims();
-        var trustedParticipants = extractTrustedParticipantsFromClaims(claims);
+        var claims = context.getContextData(ParticipantAgent.class).getClaims();
+        var trustedParticipantsList = extractTrustedParticipantsFromClaims(claims);
+        Set<String> trustedParticipants = new HashSet<>(trustedParticipantsList);
         LOGGER.log(Level.INFO, "Trusted Participants:" + trustedParticipants);
         if (!(rightValue instanceof Collection<?> rightValueCollection)) {
             LOGGER.log(Level.WARNING, "rightValue contains non-String elements");
             return false; // rightValue is not a Collection, cannot proceed
         }
-        LOGGER.log(Level.INFO, "Right Value Collection:" + rightValueCollection);
+        Set<String> rightValueSet = rightValueCollection.stream()
+                .map(obj -> (String) obj)
+                .collect(Collectors.toSet());
+        LOGGER.log(Level.INFO, "Right Value Collection:" + rightValueSet);
         return switch (operator) {
-            case EQ -> trustedParticipants.containsAll(rightValueCollection);
-            case NEQ -> !trustedParticipants.containsAll(rightValueCollection);
-            case IN -> trustedParticipants.stream().anyMatch(rightValueCollection::contains);
+            case EQ -> trustedParticipants.containsAll(rightValueSet);
+            case NEQ -> !trustedParticipants.containsAll(rightValueSet);
+            case IN -> rightValueSet.stream().anyMatch(trustedParticipants::contains);
             default -> false;
         };
     }
@@ -57,26 +72,30 @@ public class TrustedParticipantsConstraintFunction implements AtomicConstraintFu
     private List<String> extractTrustedParticipantsFromClaims(Map<String, Object> claims) {
         return claims.values().stream()
                 .filter(Credential.class::isInstance)
-                .map(credential -> (Credential) credential)
+                .map(Credential.class::cast)
                 .map(this::extractTrustedParticipantsFromCredential)
-                .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
-    @Nullable
     private List<String> extractTrustedParticipantsFromCredential(Credential credential) {
         var claims = credential.getCredentialSubject().getClaims();
         LOGGER.log(Level.INFO, "Received Claims: " + claims);
-
-        var trustedParticipants = claims.get(TRUSTED_PARTICIPANTS_KEY);
-        LOGGER.log(Level.INFO, "Received trusted_participants: " + trustedParticipants);
-
-        if (trustedParticipants instanceof List) {
-            return (List<String>) trustedParticipants;
+        var trustedParticipantsObject = claims.get(TRUSTED_PARTICIPANTS_KEY);
+        LOGGER.log(Level.INFO, "Received trusted_participants: " + trustedParticipantsObject);
+        if (trustedParticipantsObject instanceof List<?> rawList) {
+            List<String> trustedParticipants = new ArrayList<>();
+            for (Object item : rawList) {
+                if (item instanceof String) {
+                    trustedParticipants.add((String) item);
+                } else {
+                    LOGGER.log(Level.WARNING, "trusted_participant is not a String: " + item);
+                }
+            }
+            return trustedParticipants;
         } else {
-            LOGGER.log(Level.WARNING, "trusted_participants is not a list");
+            LOGGER.log(Level.WARNING, "trusted_participants is not a List");
             return Collections.emptyList();
         }
     }

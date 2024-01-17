@@ -19,6 +19,7 @@ import org.eclipse.edc.policy.engine.spi.AtomicConstraintFunction;
 import org.eclipse.edc.policy.engine.spi.PolicyContext;
 import org.eclipse.edc.policy.model.Operator;
 import org.eclipse.edc.policy.model.Permission;
+import org.eclipse.edc.spi.agent.ParticipantAgent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -28,13 +29,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * RegionConstraintFunction is used to evaluate if a given Permission
+ * meets the regional constraints specified in the policy.
+ * <p>
+ * This class implements the AtomicConstraintFunction interface,
+ * providing a specific implementation for handling regional constraints
+ * within the policy evaluation process.
+ */
 public class RegionConstraintFunction implements AtomicConstraintFunction<Permission> {
 
     private static final String REGION_KEY = "region";
 
     @Override
     public boolean evaluate(Operator operator, Object rightValue, Permission rule, PolicyContext context) {
-        var regions = getRegions(context.getParticipantAgent().getClaims());
+        var regions = getRegions(context.getContextData(ParticipantAgent.class).getClaims());
         switch (operator) {
             case EQ:
                 return regions.contains(rightValue);
