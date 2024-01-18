@@ -21,7 +21,7 @@ function seedVerifiedCredentials() {
   local participantDid="$2"
   local region="$3"
 
-   for subject in '"region": "'$region'"'
+  for subject in '"participant": "'$participantName'", "region": "'$region'"'
    do
      echo "Seeding VC for $participantName: $subject"
      java -jar identity-hub-cli.jar \

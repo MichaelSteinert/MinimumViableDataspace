@@ -28,6 +28,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * The RegionConstraintFunction class implements the AtomicConstraintFunction interface
+ * for handling region-based constraints in permission evaluations.
+ * This class can be used to determine whether certain region-specific conditions
+ * are met based on policy rules and context.
+ */
 public class RegionConstraintFunction implements AtomicConstraintFunction<Permission> {
 
     private static final String REGION_KEY = "region";
