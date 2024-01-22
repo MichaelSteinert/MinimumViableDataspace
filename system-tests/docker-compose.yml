@@ -206,7 +206,7 @@ services:
   company1-datadashboard:
     container_name: company1-datadashboard
     build:
-      context: ${MVD_UI_PATH}
+      context: ../../DataDashboard
     volumes:
       - ./resources/appconfig/company1:/usr/share/nginx/html/assets/config
     depends_on:
@@ -216,11 +216,11 @@ services:
       - "7080:80"
     profiles: ["ui"]
 
-      # Data Dashboard (MVD UI) for participant company2
+    # Data Dashboard (MVD UI) for participant company2
   company2-datadashboard:
     container_name: company2-datadashboard
     build:
-      context: ${MVD_UI_PATH}
+      context: ../../DataDashboard
     volumes:
       - ./resources/appconfig/company2:/usr/share/nginx/html/assets/config
     depends_on:
@@ -234,7 +234,7 @@ services:
   company3-datadashboard:
     container_name: company3-datadashboard
     build:
-      context: ${MVD_UI_PATH}
+      context: ../../DataDashboard
     volumes:
       - ./resources/appconfig/company3:/usr/share/nginx/html/assets/config
     depends_on:

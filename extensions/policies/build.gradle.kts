@@ -21,6 +21,7 @@ dependencies {
     api(libs.edc.spi.policy.engine)
 //    api(edc.core.connector)
     implementation(libs.ih.spi.core)
+    implementation(project(":extensions:trusted-participants-whitelist"))
 
     testImplementation(libs.edc.core.policy.engine)
 }
