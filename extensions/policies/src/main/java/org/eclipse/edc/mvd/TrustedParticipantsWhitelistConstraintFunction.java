@@ -42,7 +42,6 @@ public class TrustedParticipantsWhitelistConstraintFunction implements AtomicCon
     @Override
     public boolean evaluate(Operator operator, Object rightValue, Permission rule, PolicyContext context) {
         var trustedParticipants = TrustedParticipantsWhitelist.getInstance();
-        trustedParticipants.addTrustedParticipant("company1");
         var participants = extractParticipants(context.getContextData(ParticipantAgent.class).getClaims());
         boolean rightValueBoolean = rightValue instanceof String && Boolean.parseBoolean((String) rightValue);
         if (rightValueBoolean) {

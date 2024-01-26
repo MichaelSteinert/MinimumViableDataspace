@@ -45,11 +45,18 @@ public class TrustedParticipantsWhitelist {
 
     /**
      * Adds a trusted participant to the whitelist.
+     * This method checks if the participant is already in the list before adding them,
+     * to prevent duplicates.
      *
      * @param name The name of the participant to be added.
+     * @return true if the participant was added, false if the participant already exists.
      */
-    public void addTrustedParticipant(String name) {
-        trustedParticipants.add(name);
+    public boolean addTrustedParticipant(String name) {
+        if (!containsTrustedParticipant(name)) {
+            trustedParticipants.add(name);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -68,5 +75,23 @@ public class TrustedParticipantsWhitelist {
      */
     public void removeTrustedParticipant(String name) {
         trustedParticipants.remove(name);
+    }
+
+    /**
+     * Checks if a participant is already in the whitelist.
+     *
+     * @param name The name of the participant to check.
+     * @return true if the participant is already in the whitelist, false otherwise.
+     */
+    public boolean containsTrustedParticipant(String name) {
+        return trustedParticipants.contains(name);
+    }
+
+    /**
+     * Clears all trusted participants from the whitelist.
+     * This method is particularly useful for resetting the whitelist state during testing.
+     */
+    public void clear() {
+        trustedParticipants.clear();
     }
 }
