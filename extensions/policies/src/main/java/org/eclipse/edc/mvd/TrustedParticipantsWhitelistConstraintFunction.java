@@ -44,7 +44,7 @@ public class TrustedParticipantsWhitelistConstraintFunction implements AtomicCon
         var trustedParticipants = TrustedParticipantsWhitelist.getInstance();
         var participants = extractParticipants(context.getContextData(ParticipantAgent.class).getClaims());
         boolean rightValueBoolean = rightValue instanceof String && Boolean.parseBoolean((String) rightValue);
-        if (rightValueBoolean) {
+        if (rightValueBoolean && !participants.isEmpty()) {
             var trustedParticipantsSet = new HashSet<>(trustedParticipants.getTrustedParticipants());
             var participantsSet = new HashSet<>(participants);
             return switch (operator) {

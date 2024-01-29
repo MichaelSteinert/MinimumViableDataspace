@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022 Microsoft Corporation
+ *  Copyright (c) 2024 Fraunhofer Institute for Software and Systems Engineering
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: Apache-2.0
  *
  *  Contributors:
- *       Microsoft Corporation - initial implementation
+ *       Fraunhofer Institute for Software and Systems Engineering - initial implementation
  *
  */
 
@@ -22,13 +22,11 @@ import org.eclipse.edc.policy.model.Operator;
 import org.eclipse.edc.policy.model.Permission;
 import org.eclipse.edc.spi.agent.ParticipantAgent;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,7 +64,6 @@ class TrustedParticipantsWhitelistConstraintFunctionTest {
     void verifyPolicy_NonBooleanRightValue() {
         var claims = toCredentialsMap(PARTICIPANT_KEY, "trustedParticipant");
         var policyContext = toPolicyContext(claims);
-
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.EQ, "nonBooleanValue", PERMISSION, policyContext)).isFalse();
     }
 
@@ -87,27 +84,27 @@ class TrustedParticipantsWhitelistConstraintFunctionTest {
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.NEQ, "true", PERMISSION, policyContext)).isFalse();
     }
 
-    @Disabled
+    @Test
     void verifyPolicy_InOperatorWithPartialMatchInTrustedList() {
         String trustedParticipant = "trustedParticipant";
         TrustedParticipantsWhitelist.getInstance().addTrustedParticipant(trustedParticipant);
-
         var claims = toCredentialsMap(PARTICIPANT_KEY, trustedParticipant);
         var policyContext = toPolicyContext(claims);
-
-        assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.IN, List.of(trustedParticipant, "otherParticipant"), PERMISSION, policyContext)).isTrue();
+        assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.IN, "true", PERMISSION, policyContext)).isTrue();
     }
 
-    @Disabled
+    @Test
     void verifyPolicy_InvalidClaimFormat() {
         var claims = Map.of(UUID.randomUUID().toString(), (Object) UUID.randomUUID().toString());
         var policyContext = toPolicyContext(claims);
-
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.EQ, "true", PERMISSION, policyContext)).isFalse();
     }
 
     private PolicyContext toPolicyContext(Map<String, Object> claims) {
-        return new PolicyContextImpl(new ParticipantAgent(claims, Map.of()), Map.of());
+        PolicyContextImpl policyContext = new PolicyContextImpl();
+        ParticipantAgent participantAgent = new ParticipantAgent(claims, Map.of());
+        policyContext.putContextData(ParticipantAgent.class, participantAgent);
+        return policyContext;
     }
 
     private Map<String, Object> toCredentialsMap(String key, Object value) {

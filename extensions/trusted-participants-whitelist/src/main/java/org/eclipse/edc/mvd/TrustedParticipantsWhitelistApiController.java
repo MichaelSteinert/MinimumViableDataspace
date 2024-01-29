@@ -72,7 +72,7 @@ public class TrustedParticipantsWhitelistApiController {
     @Path("add")
     public String addTrustedParticipant(@QueryParam("name") String name) {
         monitor.info("Adding trusted participant: " + name);
-        boolean isAdded = trustedList.containsTrustedParticipant(name);
+        boolean isAdded = trustedList.addTrustedParticipant(name);
         if (isAdded) {
             return "{\"response\":\"Participant added\"}";
         } else {
