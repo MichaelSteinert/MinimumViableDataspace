@@ -14,6 +14,8 @@
 
 package org.eclipse.edc.mvd;
 
+import org.eclipse.edc.mvd.model.Participant;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
 public class TrustedParticipantsWhitelist {
 
     private static TrustedParticipantsWhitelist instance;
-    private final List<String> trustedParticipants;
+    private final List<Participant> trustedParticipants;
 
     private TrustedParticipantsWhitelist() {
         this.trustedParticipants = new ArrayList<>();
@@ -48,12 +50,11 @@ public class TrustedParticipantsWhitelist {
      * This method checks if the participant is already in the list before adding them,
      * to prevent duplicates.
      *
-     * @param name The name of the participant to be added.
      * @return true if the participant was added, false if the participant already exists.
      */
-    public boolean addTrustedParticipant(String name) {
-        if (!containsTrustedParticipant(name)) {
-            trustedParticipants.add(name);
+    public boolean addTrustedParticipant(Participant participant) {
+        if (!containsTrustedParticipant(participant)) {
+            trustedParticipants.add(participant);
             return true;
         }
         return false;
@@ -64,27 +65,27 @@ public class TrustedParticipantsWhitelist {
      *
      * @return A list of trusted participant names.
      */
-    public List<String> getTrustedParticipants() {
+    public List<Participant> getTrustedParticipants() {
         return new ArrayList<>(trustedParticipants);
     }
 
     /**
      * Removes a trusted participant from the whitelist.
      *
-     * @param name The name of the participant to be removed.
+     * @return true if the participant is removed.
+     *
      */
-    public void removeTrustedParticipant(String name) {
-        trustedParticipants.remove(name);
+    public boolean removeTrustedParticipant(Participant participant) {
+        return trustedParticipants.remove(participant);
     }
 
     /**
      * Checks if a participant is already in the whitelist.
      *
-     * @param name The name of the participant to check.
      * @return true if the participant is already in the whitelist, false otherwise.
      */
-    public boolean containsTrustedParticipant(String name) {
-        return trustedParticipants.contains(name);
+    public boolean containsTrustedParticipant(Participant participant) {
+        return trustedParticipants.contains(participant);
     }
 
     /**

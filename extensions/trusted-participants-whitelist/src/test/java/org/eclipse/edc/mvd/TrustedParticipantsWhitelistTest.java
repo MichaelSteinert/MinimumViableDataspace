@@ -14,8 +14,11 @@
 
 package org.eclipse.edc.mvd;
 
+import org.eclipse.edc.mvd.model.Participant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,29 +41,25 @@ class TrustedParticipantsWhitelistTest {
 
     @Test
     void shouldAddTrustedParticipant() {
-        boolean added = whitelist.addTrustedParticipant("participant1");
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        boolean added = whitelist.addTrustedParticipant(participant);
         assertThat(added).isTrue();
-        assertThat(whitelist.containsTrustedParticipant("participant1")).isTrue();
+        assertThat(whitelist.containsTrustedParticipant(participant)).isTrue();
     }
 
     @Test
     void shouldNotAddDuplicateTrustedParticipant() {
-        whitelist.addTrustedParticipant("participant1");
-        boolean addedAgain = whitelist.addTrustedParticipant("participant1");
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        whitelist.addTrustedParticipant(participant);
+        boolean addedAgain = whitelist.addTrustedParticipant(participant);
         assertThat(addedAgain).isFalse();
     }
 
     @Test
     void shouldRemoveTrustedParticipant() {
-        whitelist.addTrustedParticipant("participant1");
-        whitelist.removeTrustedParticipant("participant1");
-        assertThat(whitelist.containsTrustedParticipant("participant1")).isFalse();
-    }
-
-    @Test
-    void shouldClearTrustedParticipants() {
-        whitelist.addTrustedParticipant("participant1");
-        whitelist.clear();
-        assertThat(whitelist.getTrustedParticipants()).isEmpty();
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        whitelist.addTrustedParticipant(participant);
+        whitelist.removeTrustedParticipant(participant);
+        assertThat(whitelist.containsTrustedParticipant(participant)).isFalse();
     }
 }

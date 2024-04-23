@@ -15,6 +15,7 @@
 package org.eclipse.edc.mvd;
 
 import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
+import org.eclipse.edc.mvd.model.Participant;
 import org.eclipse.edc.policy.engine.spi.AtomicConstraintFunction;
 import org.eclipse.edc.policy.engine.spi.PolicyContext;
 import org.eclipse.edc.policy.model.Operator;
@@ -45,12 +46,15 @@ public class TrustedParticipantsWhitelistConstraintFunction implements AtomicCon
         var participants = extractParticipants(context.getContextData(ParticipantAgent.class).getClaims());
         boolean rightValueBoolean = rightValue instanceof String && Boolean.parseBoolean((String) rightValue);
         if (rightValueBoolean && !participants.isEmpty()) {
-            var trustedParticipantsSet = new HashSet<>(trustedParticipants.getTrustedParticipants());
+            // Need List of Names instead of List of Participants
+            var trustedParticipantNames = new HashSet<>(trustedParticipants.getTrustedParticipants()).stream()
+                    .map(Participant::name)
+                    .collect(Collectors.toSet());
             var participantsSet = new HashSet<>(participants);
             return switch (operator) {
-                case EQ -> trustedParticipantsSet.equals(participantsSet);
-                case NEQ -> !trustedParticipantsSet.equals(participantsSet);
-                case IN -> participantsSet.stream().anyMatch(trustedParticipantsSet::contains);
+                case EQ -> trustedParticipantNames.equals(participantsSet);
+                case NEQ -> !trustedParticipantNames.equals(participantsSet);
+                case IN -> participantsSet.stream().anyMatch(trustedParticipantNames::contains);
                 default -> false;
             };
         }

@@ -14,6 +14,7 @@
 
 package org.eclipse.edc.mvd;
 
+import org.eclipse.edc.mvd.model.Participant;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +24,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,40 +64,44 @@ public class TrustedParticipantsWhitelistApiControllerTest {
 
     @Test
     void testAddTrustedParticipant() {
-        String participantName = "testParticipant";
-        when(trustedList.addTrustedParticipant(participantName)).thenReturn(true);
-        String response = controller.addTrustedParticipant(participantName);
-        verify(trustedList).addTrustedParticipant(participantName);
-        verify(monitor).info("Adding trusted participant: " + participantName);
-        assertEquals("{\"response\":\"Participant added\"}", response);
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        when(trustedList.addTrustedParticipant(participant)).thenReturn(true);
+        String response = controller.addTrustedParticipant(participant);
+        verify(trustedList).addTrustedParticipant(participant);
+        verify(monitor).info("Adding trusted participant: " + participant.name());
+        assertEquals("{\"response\":\"Participant added successfully\"}", response);
     }
 
     @Test
     void testAddExistingTrustedParticipant() {
-        String participantName = "existingParticipant";
-        when(trustedList.addTrustedParticipant(participantName)).thenReturn(false);
-        String response = controller.addTrustedParticipant(participantName);
-        verify(trustedList).addTrustedParticipant(participantName);
-        verify(monitor).info("Adding trusted participant: " + participantName);
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        when(trustedList.addTrustedParticipant(participant)).thenReturn(false);
+        String response = controller.addTrustedParticipant(participant);
+        verify(trustedList).addTrustedParticipant(participant);
+        verify(monitor).info("Adding trusted participant: " + participant.name());
         assertEquals("{\"response\":\"Participant already exists\"}", response);
     }
 
     @Test
     void testGetTrustedParticipants() {
-        when(trustedList.getTrustedParticipants()).thenReturn(List.of("participant1", "participant2"));
-        var participants = controller.getTrustedParticipants();
+        List<Participant> expectedParticipants = List.of(
+                new Participant("did:example:123456789abcdefghi", "testParticipant1", Optional.empty()),
+                new Participant("did:example:123456789jklmnopqr", "testParticipant2", Optional.empty())
+        );
+        when(trustedList.getTrustedParticipants()).thenReturn(expectedParticipants);
+        List<Participant> participants = controller.getTrustedParticipants();
         verify(trustedList).getTrustedParticipants();
         verify(monitor).info("Retrieving trusted participants");
-        assertEquals(List.of("participant1", "participant2"), participants);
+        assertEquals(expectedParticipants, participants);
     }
 
     @Test
     void testRemoveTrustedParticipant() {
-        String participantName = "participantToRemove";
-        doNothing().when(trustedList).removeTrustedParticipant(participantName);
-        String response = controller.removeTrustedParticipant(participantName);
-        verify(trustedList).removeTrustedParticipant(participantName);
-        verify(monitor).info("Removing trusted participant: " + participantName);
-        assertEquals("{\"response\":\"Participant removed\"}", response);
+        Participant participant = new Participant("did:example:123456789abcdefghi", "testParticipant", Optional.empty());
+        when(trustedList.removeTrustedParticipant(participant)).thenReturn(true);
+        String response = controller.removeTrustedParticipant(participant);
+        verify(trustedList).removeTrustedParticipant(participant);
+        verify(monitor).info("Removing trusted participant: " + participant.name());
+        assertEquals("{\"response\":\"Participant removed successfully\"}", response);
     }
 }

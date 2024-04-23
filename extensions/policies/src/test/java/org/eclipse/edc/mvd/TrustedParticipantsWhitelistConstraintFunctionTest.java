@@ -16,6 +16,7 @@ package org.eclipse.edc.mvd;
 
 import org.eclipse.edc.identityhub.spi.credentials.model.Credential;
 import org.eclipse.edc.identityhub.spi.credentials.model.CredentialSubject;
+import org.eclipse.edc.mvd.model.Participant;
 import org.eclipse.edc.policy.engine.spi.PolicyContext;
 import org.eclipse.edc.policy.engine.spi.PolicyContextImpl;
 import org.eclipse.edc.policy.model.Operator;
@@ -28,6 +29,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,49 +48,51 @@ class TrustedParticipantsWhitelistConstraintFunctionTest {
 
     @Test
     void verifyPolicy_validParticipantInTrustedList() {
-        String participant = "trustedParticipant";
+        Participant participant = new Participant("did:example:123456789abcdefghi", "trustedParticipant", Optional.empty());
         TrustedParticipantsWhitelist.getInstance().addTrustedParticipant(participant);
-        var claims = toCredentialsMap(PARTICIPANT_KEY, participant);
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.EQ, "true", PERMISSION, policyContext)).isTrue();
     }
 
     @Test
     void verifyPolicy_invalidParticipantNotInTrustedList() {
-        var claims = toCredentialsMap(PARTICIPANT_KEY, "untrustedParticipant");
+        Participant participant = new Participant("did:example:123456789abcdefghi", "untrustedParticipant", Optional.empty());
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.EQ, "true", PERMISSION, policyContext)).isFalse();
     }
 
     @Test
     void verifyPolicy_NonBooleanRightValue() {
-        var claims = toCredentialsMap(PARTICIPANT_KEY, "trustedParticipant");
+        Participant participant = new Participant("did:example:123456789abcdefghi", "untrustedParticipant", Optional.empty());
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.EQ, "nonBooleanValue", PERMISSION, policyContext)).isFalse();
     }
 
     @Test
     void verifyPolicy_UnsupportedOperator() {
-        var claims = toCredentialsMap(PARTICIPANT_KEY, "trustedParticipant");
+        Participant participant = new Participant("did:example:123456789abcdefghi", "untrustedParticipant", Optional.empty());
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
-
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.GT, "true", PERMISSION, policyContext)).isFalse();
     }
 
     @Test
     void verifyPolicy_NeqOperatorWithParticipantInTrustedList() {
-        String participant = "trustedParticipant";
+        Participant participant = new Participant("did:example:123456789abcdefghi", "trustedParticipant", Optional.empty());
         TrustedParticipantsWhitelist.getInstance().addTrustedParticipant(participant);
-        var claims = toCredentialsMap(PARTICIPANT_KEY, participant);
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.NEQ, "true", PERMISSION, policyContext)).isFalse();
     }
 
     @Test
     void verifyPolicy_InOperatorWithPartialMatchInTrustedList() {
-        String trustedParticipant = "trustedParticipant";
-        TrustedParticipantsWhitelist.getInstance().addTrustedParticipant(trustedParticipant);
-        var claims = toCredentialsMap(PARTICIPANT_KEY, trustedParticipant);
+        Participant participant = new Participant("did:example:123456789abcdefghi", "trustedParticipant", Optional.empty());
+        TrustedParticipantsWhitelist.getInstance().addTrustedParticipant(participant);
+        var claims = toCredentialsMap(PARTICIPANT_KEY, participant.name());
         var policyContext = toPolicyContext(claims);
         assertThat(CONSTRAINT_FUNCTION.evaluate(Operator.IN, "true", PERMISSION, policyContext)).isTrue();
     }
