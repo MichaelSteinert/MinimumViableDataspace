@@ -20,8 +20,8 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.edc.mvd.model.DataTrusteeRequest;
 import org.eclipse.edc.mvd.model.NegotiationRequest;
@@ -36,10 +36,8 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 /**
- * The RegionConstraintFunction class implements the AtomicConstraintFunction interface
- * for handling region-based constraints in permission evaluations.
- * This class can be used to determine whether certain region-specific conditions
- * are met based on policy rules and context.
+ * TrustedParticipantsWhitelistApiController provides endpoints
+ * to maintain the whitelist for selecting data trustees
  */
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
@@ -127,8 +125,8 @@ public class TrustedParticipantsWhitelistApiController {
      * @return The result of the negotiation.
      */
     @POST
-    @Path("negotiate")
-    public String initiateNegotiation(@QueryParam("id") String counterPartyUrl) {
+    @Path("negotiate/{counterPartyUrl}")
+    public String initiateNegotiation(@PathParam("counterPartyUrl") String counterPartyUrl) {
         try {
             List<Participant> participants = trustedList.getTrustedParticipants();
             String requestBody = objectMapper.writeValueAsString(participants);
