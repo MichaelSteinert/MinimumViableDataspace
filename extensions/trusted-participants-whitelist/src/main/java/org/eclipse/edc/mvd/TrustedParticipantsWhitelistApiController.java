@@ -25,14 +25,18 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.edc.mvd.model.DataTrusteeRequest;
 import org.eclipse.edc.mvd.model.NegotiationRequest;
+import org.eclipse.edc.mvd.model.NegotiationInitiateRequest;
 import org.eclipse.edc.mvd.model.NegotiationResponse;
 import org.eclipse.edc.mvd.model.Participant;
+import org.eclipse.edc.mvd.model.TrustedParticipantsResponse;
+import org.eclipse.edc.mvd.util.HashUtil;
 import org.eclipse.edc.spi.monitor.Monitor;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -97,9 +101,16 @@ public class TrustedParticipantsWhitelistApiController {
      */
     @GET
     @Path("list")
-    public List<Participant> getTrustedParticipants() {
+    public TrustedParticipantsResponse getTrustedParticipants() {
         monitor.info("Retrieving trusted participants");
-        return trustedList.getTrustedParticipants();
+        List<Participant> participants = trustedList.getTrustedParticipants();
+        String hash = "";
+        try {
+            hash = HashUtil.computeHash(participants);
+        } catch (NoSuchAlgorithmException e) {
+            monitor.warning("Failed to compute Hash: " + e.getMessage());
+        }
+        return new TrustedParticipantsResponse(participants, hash);
     }
 
     /**
@@ -129,7 +140,9 @@ public class TrustedParticipantsWhitelistApiController {
     public String initiateNegotiation(@PathParam("counterPartyUrl") String counterPartyUrl) {
         try {
             List<Participant> participants = trustedList.getTrustedParticipants();
-            String requestBody = objectMapper.writeValueAsString(participants);
+            String hash = HashUtil.computeHash(participants);
+            NegotiationInitiateRequest negotiationInitiateRequest = new NegotiationInitiateRequest(participants, hash);
+            String requestBody = objectMapper.writeValueAsString(negotiationInitiateRequest);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(counterPartyUrl))
                     .header("Content-Type", "application/json")
@@ -154,6 +167,18 @@ public class TrustedParticipantsWhitelistApiController {
     @Path("receive-negotiation")
     public String receiveNegotiation(NegotiationRequest negotiationRequest) {
         monitor.info("Received negotiation request");
+        try {
+            String receivedHash = negotiationRequest.hash();
+            List<Participant> participants = negotiationRequest.trustedDataTrustees();
+            String computedHash = HashUtil.computeHash(participants);
+            if (!computedHash.equals(receivedHash)) {
+                monitor.warning("Hash mismatch: possible data tampering detected.");
+                return "{\"error\":\"Hash mismatch: possible data tampering detected.\"}";
+            }
+        } catch (NoSuchAlgorithmException e) {
+            monitor.warning("Failed to compute hash: " + e.getMessage());
+            return "{\"error\":\"Failed to compute hash: " + e.getMessage() + "\"}";
+        }
         List<Participant> matches = trustedList.getTrustedParticipants().stream()
                 .filter(negotiationRequest.trustedDataTrustees()::contains)
                 .toList();

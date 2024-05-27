@@ -15,6 +15,8 @@
 package org.eclipse.edc.mvd;
 
 import org.eclipse.edc.mvd.model.Participant;
+import org.eclipse.edc.mvd.model.TrustedParticipantsResponse;
+import org.eclipse.edc.mvd.util.HashUtil;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,16 +86,18 @@ public class TrustedParticipantsWhitelistApiControllerTest {
     }
 
     @Test
-    void testGetTrustedParticipants() {
+    void testGetTrustedParticipants() throws NoSuchAlgorithmException {
         List<Participant> expectedParticipants = List.of(
                 new Participant("did:example:123456789abcdefghi", "testParticipant1", Optional.empty()),
                 new Participant("did:example:123456789jklmnopqr", "testParticipant2", Optional.empty())
         );
         when(trustedList.getTrustedParticipants()).thenReturn(expectedParticipants);
-        List<Participant> participants = controller.getTrustedParticipants();
+        TrustedParticipantsResponse response = controller.getTrustedParticipants();
+        String expectedHash = HashUtil.computeHash(expectedParticipants);
         verify(trustedList).getTrustedParticipants();
         verify(monitor).info("Retrieving trusted participants");
-        assertEquals(expectedParticipants, participants);
+        assertEquals(expectedParticipants, response.participants());
+        assertEquals(expectedHash, response.hash());
     }
 
     @Test
